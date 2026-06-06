@@ -1,4 +1,5 @@
-import { EmbedBuilder } from 'discord.js';
+import djs from 'discord.js';
+const { EmbedBuilder } = djs;
 
 export function successEmbed(title, description) {
   return new EmbedBuilder().setColor(0x2ecc71).setTitle(`✅ ${title}`).setDescription(description);

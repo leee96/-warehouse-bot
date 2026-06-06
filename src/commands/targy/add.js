@@ -1,4 +1,5 @@
-import { SlashCommandSubcommandBuilder } from 'discord.js';
+import djs from 'discord.js';
+const { SlashCommandSubcommandBuilder } = djs;
 import db from '../../lib/db.js';
 import { requireArmorer } from '../../lib/permissions.js';
 import { successEmbed, errorEmbed, auditEmbed } from '../../lib/embeds.js'; // B-03 fix: merged imports

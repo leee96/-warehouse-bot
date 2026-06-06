@@ -1,5 +1,6 @@
 import 'dotenv/config';
-import { Client, GatewayIntentBits, Collection } from 'discord.js';
+import djs from 'discord.js';
+const { Client, GatewayIntentBits, Collection } = djs;
 import { logger } from './lib/logger.js';
 
 // S-03: fail fast with a clear message instead of a cryptic discord.js error

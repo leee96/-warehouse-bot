@@ -1,4 +1,5 @@
-import { SlashCommandSubcommandBuilder } from 'discord.js';
+import djs from 'discord.js';
+const { SlashCommandSubcommandBuilder } = djs;
 import db from '../../lib/db.js';
 import { successEmbed, errorEmbed, auditEmbed } from '../../lib/embeds.js';
 import { logToChannel } from '../../lib/logger.js';

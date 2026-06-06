@@ -1,6 +1,7 @@
 import { logger } from '../lib/logger.js';
 import db from '../lib/db.js';
-import { EmbedBuilder } from 'discord.js';
+import djs from 'discord.js';
+const { EmbedBuilder } = djs;
 import { buildPaginationRow, PAGE_SIZE } from '../lib/pagination.js';
 import { checkCooldown } from '../lib/ratelimit.js';
 import { errorEmbed } from '../lib/embeds.js';

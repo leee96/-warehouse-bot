@@ -1,4 +1,5 @@
-import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+import djs from 'discord.js';
+const { SlashCommandBuilder, EmbedBuilder } = djs;
 
 export const builder = new SlashCommandBuilder()
   .setName('help')

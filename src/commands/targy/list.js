@@ -1,4 +1,5 @@
-import { SlashCommandSubcommandBuilder, EmbedBuilder } from 'discord.js';
+import djs from 'discord.js';
+const { SlashCommandSubcommandBuilder, EmbedBuilder } = djs;
 import db from '../../lib/db.js';
 import { buildPaginationRow, PAGE_SIZE } from '../../lib/pagination.js';
 

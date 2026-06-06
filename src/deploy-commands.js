@@ -1,5 +1,6 @@
 import 'dotenv/config';
-import { REST, Routes, SlashCommandBuilder } from 'discord.js';
+import djs from 'discord.js';
+const { REST, Routes, SlashCommandBuilder } = djs;
 
 import { builder as targyAddBuilder } from './commands/targy/add.js';
 import { builder as targyEditBuilder } from './commands/targy/edit.js';
