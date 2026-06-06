@@ -19,9 +19,14 @@ import { builder as kiadasMyBuilder } from './commands/kiadas/my.js';
 
 import { builder as adminLogBuilder } from './commands/admin/log.js';
 import { builder as adminLowstockBuilder } from './commands/admin/lowstock.js';
+import { builder as adminRaktarBuilder } from './commands/admin/raktar.js';
 import { roleBuilder, logchannelBuilder } from './commands/admin/setup.js';
 
+import { builder as helpBuilder } from './commands/help.js';
+
 const commands = [
+  helpBuilder,
+
   new SlashCommandBuilder()
     .setName('targy')
     .setDescription('Tárgykatalógus kezelése')
@@ -52,6 +57,7 @@ const commands = [
     .setDescription('Adminisztrációs parancsok')
     .addSubcommand(adminLogBuilder)
     .addSubcommand(adminLowstockBuilder)
+    .addSubcommand(adminRaktarBuilder)
     .addSubcommandGroup((group) =>
       group
         .setName('setup')

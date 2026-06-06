@@ -1,26 +1,23 @@
 import { SlashCommandSubcommandBuilder } from 'discord.js';
 import db from '../../lib/db.js';
-import { requireArmorer } from '../../lib/permissions.js';
 import { successEmbed, errorEmbed, auditEmbed } from '../../lib/embeds.js';
 import { logToChannel } from '../../lib/logger.js';
 
 export const builder = new SlashCommandSubcommandBuilder()
   .setName('new')
-  .setDescription('Tárgy kiadása felhasználónak')
+  .setDescription('Tárgy kivételének rögzítése')
   .addStringOption((o) =>
     o.setName('name').setDescription('Tárgy neve').setRequired(true).setAutocomplete(true)
   )
-  .addUserOption((o) => o.setName('user').setDescription('Felhasználó').setRequired(true))
   .addIntegerOption((o) =>
     o.setName('qty').setDescription('Mennyiség').setMinValue(1).setRequired(true)
   )
   .addStringOption((o) => o.setName('reason').setDescription('Indoklás').setRequired(false));
 
 export async function execute(interaction) {
-  if (!(await requireArmorer(interaction))) return;
 
   const name = interaction.options.getString('name');
-  const targetUser = interaction.options.getUser('user');
+  const targetUser = interaction.user;
   const qty = interaction.options.getInteger('qty');
   const reason = interaction.options.getString('reason');
 

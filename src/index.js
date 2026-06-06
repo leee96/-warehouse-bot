@@ -31,10 +31,14 @@ import * as kiadasMy from './commands/kiadas/my.js';
 
 import * as adminLog from './commands/admin/log.js';
 import * as adminLowstock from './commands/admin/lowstock.js';
+import * as adminRaktar from './commands/admin/raktar.js';
 import * as adminSetup from './commands/admin/setup.js';
+
+import * as help from './commands/help.js';
 
 import { execute as onInteraction } from './events/interactionCreate.js';
 import { execute as onReady, once as readyOnce } from './events/ready.js';
+import { execute as onMessage } from './events/messageCreate.js';
 
 // --- Command registry ---
 // Map: commandName -> { execute, autocomplete? }
@@ -79,6 +83,10 @@ commands.set('kiadas', {
   },
 });
 
+commands.set('help', {
+  execute: (interaction) => help.execute(interaction),
+});
+
 commands.set('admin', {
   execute: async (interaction) => {
     const sub = interaction.options.getSubcommand();
@@ -90,12 +98,17 @@ commands.set('admin', {
     }
     if (sub === 'log') return adminLog.execute(interaction);
     if (sub === 'lowstock') return adminLowstock.execute(interaction);
+    if (sub === 'raktar') return adminRaktar.execute(interaction);
   },
 });
 
 // --- Client ---
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds],
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+  ],
 });
 
 if (readyOnce) {
@@ -105,6 +118,7 @@ if (readyOnce) {
 }
 
 client.on('interactionCreate', (interaction) => onInteraction(interaction, commands));
+client.on('messageCreate', (message) => onMessage(message));
 
 client.on('error', (err) => logger.error({ err }, 'Client error'));
 process.on('unhandledRejection', (err) => logger.error({ err }, 'Unhandled rejection'));
