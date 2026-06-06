@@ -1,0 +1,68 @@
+import { SlashCommandSubcommandBuilder, EmbedBuilder } from 'discord.js';
+import db from '../../lib/db.js';
+import { errorEmbed } from '../../lib/embeds.js';
+
+export const builder = new SlashCommandSubcommandBuilder()
+  .setName('info')
+  .setDescription('Tárgy részletes adatai')
+  .addStringOption((o) =>
+    o.setName('name').setDescription('Tárgy neve').setRequired(true).setAutocomplete(true)
+  );
+
+export async function execute(interaction) {
+  const name = interaction.options.getString('name');
+
+  const item = await db.item.findUnique({
+    where: { guildId_name: { guildId: interaction.guildId, name } },
+    include: {
+      assignments: { where: { returnedAt: null }, orderBy: { assignedAt: 'desc' } },
+      movements: { orderBy: { createdAt: 'desc' }, take: 5 },
+    },
+  });
+
+  if (!item) {
+    return interaction.reply({
+      embeds: [errorEmbed('Nem található', `**${name}** nevű tárgy nem létezik.`)],
+      ephemeral: true,
+    });
+  }
+
+  const embed = new EmbedBuilder()
+    .setColor(item.archived ? 0x95a5a6 : 0x3498db)
+    .setTitle(`📦 ${item.name}${item.archived ? ' (archivált)' : ''}`)
+    .addFields(
+      { name: 'Összes készlet', value: String(item.totalQty), inline: true },
+      { name: 'Elérhető', value: String(item.availableQty), inline: true },
+      { name: 'Kiadva', value: String(item.totalQty - item.availableQty), inline: true },
+      { name: 'Min. készlet', value: String(item.minStock), inline: true },
+      { name: 'Kategória', value: item.category ?? '—', inline: true }
+    )
+    .setTimestamp(item.updatedAt);
+
+  if (item.assignments.length > 0) {
+    const assignList = item.assignments
+      .slice(0, 10)
+      .map((a) => `<@${a.userId}> — **${a.qty} db** (${new Date(a.assignedAt).toLocaleDateString('hu-HU')})`)
+      .join('\n');
+    embed.addFields({ name: `Aktív kiadások (${item.assignments.length})`, value: assignList });
+  }
+
+  if (item.availableQty <= item.minStock && item.minStock > 0) {
+    embed.addFields({ name: '⚠️ Figyelmeztetés', value: 'Készlet a minimum határ alatt vagy azon!' });
+    embed.setColor(0xe74c3c);
+  }
+
+  await interaction.reply({ embeds: [embed] });
+}
+
+export async function autocomplete(interaction) {
+  const focused = interaction.options.getFocused();
+  const items = await db.item.findMany({
+    where: {
+      guildId: interaction.guildId,
+      name: { contains: focused, mode: 'insensitive' },
+    },
+    take: 25,
+  });
+  await interaction.respond(items.map((i) => ({ name: `${i.name}${i.archived ? ' [archivált]' : ''}`, value: i.name })));
+}

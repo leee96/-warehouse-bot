@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Item {
+  id           String       @id @default(cuid())
+  guildId      String
+  name         String
+  category     String?
+  totalQty     Int          @default(0)
+  availableQty Int          @default(0)
+  minStock     Int          @default(0)
+  archived     Boolean      @default(false)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  movements    Movement[]
+  assignments  Assignment[]
+
+  @@unique([guildId, name])
+  @@index([guildId])
+}
+
+model Movement {
+  id        String       @id @default(cuid())
+  itemId    String
+  item      Item         @relation(fields: [itemId], references: [id])
+  type      MovementType
+  qty       Int
+  delta     Int?
+  userId    String
+  reason    String?
+  createdAt DateTime     @default(now())
+
+  @@index([itemId])
+  @@index([userId])
+}
+
+enum MovementType {
+  IN
+  OUT
+  ADJUST
+  ASSIGN
+  RETURN
+}
+
+model Assignment {
+  id         String    @id @default(cuid())
+  itemId     String
+  item       Item      @relation(fields: [itemId], references: [id])
+  guildId    String
+  userId     String
+  qty        Int
+  assignedAt DateTime  @default(now())
+  returnedAt DateTime?
+  returnedTo String?
+
+  @@index([guildId, userId])
+  @@index([itemId])
+}
+
+model Config {
+  id           String  @id @default(cuid())
+  guildId      String  @unique
+  armorRoleId  String?
+  logChannelId String?
+}
