@@ -41,6 +41,8 @@ export function buildHelpEmbed() {
       {
         name: '⚙️ Adminisztráció (`/admin`)',
         value: [
+          '`/admin raktar` – Teljes raktárkészlet áttekintése',
+          '`/admin heti` – Heti összesítő (elmúlt 7 nap)',
           '`/admin log` – Mozgásnapló megtekintése',
           '`/admin lowstock` – Alacsony készletű tárgyak',
           '`/admin setup role` – Fegyvertáros szerepkör beállítása',
