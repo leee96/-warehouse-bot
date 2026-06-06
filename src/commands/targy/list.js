@@ -17,7 +17,7 @@ export async function execute(interaction) {
   const where = {
     guildId: interaction.guildId,
     archived: false,
-    ...(category ? { category: { equals: category, mode: 'insensitive' } } : {}),
+    ...(category ? { category: { equals: category } } : {}),
   };
 
   const [total, items] = await Promise.all([

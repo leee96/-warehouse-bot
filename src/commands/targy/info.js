@@ -60,7 +60,7 @@ export async function autocomplete(interaction) {
   const items = await db.item.findMany({
     where: {
       guildId: interaction.guildId,
-      name: { contains: focused, mode: 'insensitive' },
+      name: { contains: focused },
     },
     take: 25,
   });

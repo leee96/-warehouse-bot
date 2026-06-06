@@ -80,7 +80,7 @@ export async function autocomplete(interaction) {
     where: {
       guildId: interaction.guildId,
       archived: false,
-      name: { contains: focused, mode: 'insensitive' },
+      name: { contains: focused },
     },
     take: 25,
   });

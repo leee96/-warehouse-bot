@@ -94,7 +94,7 @@ export async function autocomplete(interaction) {
       guildId: interaction.guildId,
       archived: false,
       availableQty: { gt: 0 },
-      name: { contains: focused, mode: 'insensitive' },
+      name: { contains: focused },
     },
     take: 25,
   });

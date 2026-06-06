@@ -16,7 +16,7 @@ export async function execute(interaction) {
     where: {
       guildId: interaction.guildId,
       archived: false,
-      name: { contains: query, mode: 'insensitive' },
+      name: { contains: query },
     },
     orderBy: { name: 'asc' },
     take: 25,

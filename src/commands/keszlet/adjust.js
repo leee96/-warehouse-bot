@@ -79,7 +79,7 @@ export async function execute(interaction) {
 export async function autocomplete(interaction) {
   const focused = interaction.options.getFocused();
   const items = await db.item.findMany({
-    where: { guildId: interaction.guildId, archived: false, name: { contains: focused, mode: 'insensitive' } },
+    where: { guildId: interaction.guildId, archived: false, name: { contains: focused } },
     take: 25,
   });
   await interaction.respond(items.map((i) => ({ name: `${i.name} (${i.availableQty} db)`, value: i.name })));
