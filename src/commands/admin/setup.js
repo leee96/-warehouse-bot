@@ -1,4 +1,5 @@
-import { SlashCommandSubcommandBuilder, PermissionFlagsBits } from 'discord.js';
+import { SlashCommandSubcommandBuilder } from 'discord.js';
+import { PermissionFlagsBits } from 'discord-api-types/v10';
 import db from '../../lib/db.js';
 import { successEmbed, errorEmbed } from '../../lib/embeds.js';
 
