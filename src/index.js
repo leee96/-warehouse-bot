@@ -33,6 +33,7 @@ import * as kiadasMy from './commands/kiadas/my.js';
 import * as adminLog from './commands/admin/log.js';
 import * as adminLowstock from './commands/admin/lowstock.js';
 import * as adminRaktar from './commands/admin/raktar.js';
+import * as adminHeti from './commands/admin/heti.js';
 import * as adminSetup from './commands/admin/setup.js';
 
 import * as help from './commands/help.js';
@@ -100,6 +101,7 @@ commands.set('admin', {
     if (sub === 'log') return adminLog.execute(interaction);
     if (sub === 'lowstock') return adminLowstock.execute(interaction);
     if (sub === 'raktar') return adminRaktar.execute(interaction);
+    if (sub === 'heti') return adminHeti.execute(interaction);
   },
 });
 

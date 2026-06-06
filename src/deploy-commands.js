@@ -21,6 +21,7 @@ import { builder as kiadasMyBuilder } from './commands/kiadas/my.js';
 import { builder as adminLogBuilder } from './commands/admin/log.js';
 import { builder as adminLowstockBuilder } from './commands/admin/lowstock.js';
 import { builder as adminRaktarBuilder } from './commands/admin/raktar.js';
+import { builder as adminHetiBuilder } from './commands/admin/heti.js';
 import { roleBuilder, logchannelBuilder } from './commands/admin/setup.js';
 
 import { builder as helpBuilder } from './commands/help.js';
@@ -59,6 +60,7 @@ const commands = [
     .addSubcommand(adminLogBuilder)
     .addSubcommand(adminLowstockBuilder)
     .addSubcommand(adminRaktarBuilder)
+    .addSubcommand(adminHetiBuilder)
     .addSubcommandGroup((group) =>
       group
         .setName('setup')
