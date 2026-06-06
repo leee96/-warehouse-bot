@@ -72,7 +72,7 @@ export async function execute(interaction) {
       item: item.name,
       qty: Math.abs(delta),
       reason,
-    },
+    }),
     interaction.guildId
   );
 }

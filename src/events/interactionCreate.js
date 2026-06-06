@@ -2,15 +2,40 @@ import { logger } from '../lib/logger.js';
 import db from '../lib/db.js';
 import { EmbedBuilder } from 'discord.js';
 import { buildPaginationRow, PAGE_SIZE } from '../lib/pagination.js';
+import { checkCooldown } from '../lib/ratelimit.js';
+import { errorEmbed } from '../lib/embeds.js';
+
+// Write commands that are subject to per-user rate limiting
+const WRITE_COMMANDS = new Set([
+  'targy:add', 'targy:edit', 'targy:remove',
+  'keszlet:in', 'keszlet:out', 'keszlet:adjust',
+  'kiadas:new', 'kiadas:return',
+]);
 
 export const name = 'interactionCreate';
 
 export async function execute(interaction, commands) {
+  // S-02: reject all interactions outside a guild (DMs, group DMs)
+  if (!interaction.guildId) return;
+
   if (interaction.isChatInputCommand()) {
     const command = commands.get(interaction.commandName);
     if (!command) return;
 
     try {
+      // Rate limit write commands per user
+      const subcommand = interaction.options.getSubcommand(false);
+      const cmdKey = subcommand ? `${interaction.commandName}:${subcommand}` : interaction.commandName;
+      if (WRITE_COMMANDS.has(cmdKey)) {
+        const { limited, remainingMs } = checkCooldown(interaction.user.id, cmdKey);
+        if (limited) {
+          return interaction.reply({
+            embeds: [errorEmbed('Lassíts!', `Várj még **${(remainingMs / 1000).toFixed(1)} mp**-et a következő parancs előtt.`)],
+            ephemeral: true,
+          });
+        }
+      }
+
       const result = await command.execute(interaction);
       // Commands that return a payload (e.g. list) need to be replied here
       if (result && !interaction.replied && !interaction.deferred) {

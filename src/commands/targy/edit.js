@@ -69,7 +69,7 @@ export async function execute(interaction) {
 
   await logToChannel(
     interaction.client,
-    auditEmbed({ action: 'Tárgy szerkesztve', user: interaction.user.id, item: updated.name },
+    auditEmbed({ action: 'Tárgy szerkesztve', user: interaction.user.id, item: updated.name }),
     interaction.guildId
   );
 }

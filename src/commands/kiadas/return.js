@@ -18,7 +18,14 @@ export async function execute(interaction) {
   const shortId = interaction.options.getString('id').trim();
   const reason = interaction.options.getString('reason');
 
-  // B-10 fix: accept the 8-char short ID shown in /kiadas list and /kiadas new
+  // Validate: must be 6-25 alphanumeric chars to prevent endsWith('') matching everything
+  if (!/^[a-z0-9]{6,25}$/i.test(shortId)) {
+    return interaction.reply({
+      embeds: [errorEmbed('Érvénytelen azonosító', 'Az azonosító 6-25 alfanumerikus karakter lehet.')],
+      ephemeral: true,
+    });
+  }
+
   const assignment = await db.assignment.findFirst({
     where: { id: { endsWith: shortId }, guildId: interaction.guildId },
     include: { item: true },
@@ -75,7 +82,7 @@ export async function execute(interaction) {
       item: `${assignment.item.name} ← <@${assignment.userId}>`,
       qty: assignment.qty,
       reason,
-    },
+    }),
     interaction.guildId
   );
 }

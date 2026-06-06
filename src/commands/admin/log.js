@@ -37,14 +37,14 @@ export async function execute(interaction) {
   if (movements.length === 0) {
     embed.setDescription('Nincs rögzített művelet.');
   } else {
-    embed.setDescription(
-      movements
-        .map(
-          (m) =>
-            `${TYPE_LABEL[m.type] ?? m.type} **${m.item.name}** × ${m.qty} — <@${m.userId}> (${new Date(m.createdAt).toLocaleString('hu-HU')})${m.reason ? ` — *${m.reason}*` : ''}`
-        )
-        .join('\n')
+    const lines = movements.map(
+      (m) =>
+        `${TYPE_LABEL[m.type] ?? m.type} **${m.item.name.slice(0, 50)}** × ${m.qty} — <@${m.userId}> (${new Date(m.createdAt).toLocaleString('hu-HU')})${m.reason ? ` — *${m.reason.slice(0, 80)}*` : ''}`
     );
+    // Discord embed description max 4096 chars
+    let desc = lines.join('\n');
+    if (desc.length > 4000) desc = desc.slice(0, 3997) + '…';
+    embed.setDescription(desc);
   }
 
   await interaction.reply({ embeds: [embed], ephemeral: true });

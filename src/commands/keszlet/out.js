@@ -67,7 +67,7 @@ export async function execute(interaction) {
 
   await logToChannel(
     interaction.client,
-    auditEmbed({ action: 'Kimenet (OUT)', user: interaction.user.id, item: item.name, qty, reason },
+    auditEmbed({ action: 'Kimenet (OUT)', user: interaction.user.id, item: item.name, qty, reason }),
     interaction.guildId
   );
 }

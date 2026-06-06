@@ -55,7 +55,7 @@ export async function execute(interaction) {
 
   await logToChannel(
     interaction.client,
-    auditEmbed({ action: 'Beérkezés (IN)', user: interaction.user.id, item: item.name, qty, reason },
+    auditEmbed({ action: 'Beérkezés (IN)', user: interaction.user.id, item: item.name, qty, reason }),
     interaction.guildId
   );
 }

@@ -2,6 +2,16 @@ import 'dotenv/config';
 import { Client, GatewayIntentBits, Collection } from 'discord.js';
 import { logger } from './lib/logger.js';
 
+// S-03: fail fast with a clear message instead of a cryptic discord.js error
+if (!process.env.DISCORD_TOKEN) {
+  logger.fatal('DISCORD_TOKEN hiányzik a .env fájlból. Állítsd be és indítsd újra a botot.');
+  process.exit(1);
+}
+if (!process.env.CLIENT_ID) {
+  logger.fatal('CLIENT_ID hiányzik a .env fájlból.');
+  process.exit(1);
+}
+
 // --- Command loaders ---
 import * as targyAdd from './commands/targy/add.js';
 import * as targyEdit from './commands/targy/edit.js';
