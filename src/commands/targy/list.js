@@ -10,9 +10,9 @@ export const builder = new SlashCommandSubcommandBuilder()
     o.setName('page').setDescription('Oldal száma').setMinValue(1).setRequired(false)
   );
 
-export async function execute(interaction) {
-  const category = interaction.options.getString('category');
-  const page = (interaction.options.getInteger('page') ?? 1) - 1;
+export async function execute(interaction, pageOverride) {
+  const category = interaction.options?.getString('category');
+  const page = pageOverride ?? (interaction.options?.getInteger('page') ?? 1) - 1;
 
   const where = {
     guildId: interaction.guildId,
@@ -49,6 +49,6 @@ export async function execute(interaction) {
     embed.setDescription(lines.join('\n'));
   }
 
-  const components = totalPages > 1 ? [buildPaginationRow(page, totalPages)] : [];
-  await interaction.reply({ embeds: [embed], components });
+  const components = totalPages > 1 ? [buildPaginationRow(page, totalPages, 'targy')] : [];
+  return { embeds: [embed], components };
 }

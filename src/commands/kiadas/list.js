@@ -37,7 +37,7 @@ export async function execute(interaction) {
       assignments
         .map(
           (a) =>
-            `\`${a.id.slice(-6)}\` **${a.item.name}** × ${a.qty} db — <@${a.userId}> (${new Date(a.assignedAt).toLocaleDateString('hu-HU')})`
+            `\`${a.id.slice(-8)}\` **${a.item.name}** × ${a.qty} db — <@${a.userId}> (${new Date(a.assignedAt).toLocaleDateString('hu-HU')})`
         )
         .join('\n')
     );

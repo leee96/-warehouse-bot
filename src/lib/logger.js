@@ -1,4 +1,5 @@
 import pino from 'pino';
+import db from './db.js';
 
 export const logger = pino({
   transport:
@@ -8,17 +9,16 @@ export const logger = pino({
   level: process.env.LOG_LEVEL ?? 'info',
 });
 
-export async function logToChannel(client, embed) {
+// B-01 fix: guildId param — only log to the guild where the action happened
+// B-09 fix: static db import instead of dynamic import() on every call
+export async function logToChannel(client, embed, guildId) {
   try {
-    const configs = await import('./db.js').then((m) =>
-      m.default.config.findMany({ where: { logChannelId: { not: null } } })
-    );
-    for (const config of configs) {
-      if (!config.logChannelId) continue;
-      const channel = await client.channels.fetch(config.logChannelId).catch(() => null);
-      if (channel?.isTextBased()) {
-        await channel.send({ embeds: [embed] });
-      }
+    const config = await db.config.findUnique({ where: { guildId } });
+    if (!config?.logChannelId) return;
+
+    const channel = await client.channels.fetch(config.logChannelId).catch(() => null);
+    if (channel?.isTextBased()) {
+      await channel.send({ embeds: [embed] });
     }
   } catch (err) {
     logger.error({ err }, 'logToChannel failed');

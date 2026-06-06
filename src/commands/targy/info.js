@@ -2,6 +2,14 @@ import { SlashCommandSubcommandBuilder, EmbedBuilder } from 'discord.js';
 import db from '../../lib/db.js';
 import { errorEmbed } from '../../lib/embeds.js';
 
+const MOVEMENT_LABEL = {
+  IN: '📥 Beérkezés',
+  OUT: '📤 Kimenet',
+  ADJUST: '🔧 Kiigazítás',
+  ASSIGN: '👤 Kiadás',
+  RETURN: '↩️ Visszavétel',
+};
+
 export const builder = new SlashCommandSubcommandBuilder()
   .setName('info')
   .setDescription('Tárgy részletes adatai')
@@ -42,9 +50,23 @@ export async function execute(interaction) {
   if (item.assignments.length > 0) {
     const assignList = item.assignments
       .slice(0, 10)
-      .map((a) => `<@${a.userId}> — **${a.qty} db** (${new Date(a.assignedAt).toLocaleDateString('hu-HU')})`)
+      .map(
+        (a) =>
+          `<@${a.userId}> — **${a.qty} db** (\`${a.id.slice(-6)}\`) ${new Date(a.assignedAt).toLocaleDateString('hu-HU')}`
+      )
       .join('\n');
     embed.addFields({ name: `Aktív kiadások (${item.assignments.length})`, value: assignList });
+  }
+
+  // B-06 fix: actually display the fetched movements
+  if (item.movements.length > 0) {
+    const movLog = item.movements
+      .map(
+        (m) =>
+          `${MOVEMENT_LABEL[m.type] ?? m.type} **${m.qty} db** — <@${m.userId}> ${new Date(m.createdAt).toLocaleDateString('hu-HU')}${m.reason ? ` *(${m.reason})*` : ''}`
+      )
+      .join('\n');
+    embed.addFields({ name: 'Utolsó 5 mozgás', value: movLog });
   }
 
   if (item.availableQty <= item.minStock && item.minStock > 0) {
@@ -58,11 +80,10 @@ export async function execute(interaction) {
 export async function autocomplete(interaction) {
   const focused = interaction.options.getFocused();
   const items = await db.item.findMany({
-    where: {
-      guildId: interaction.guildId,
-      name: { contains: focused },
-    },
+    where: { guildId: interaction.guildId, name: { contains: focused } },
     take: 25,
   });
-  await interaction.respond(items.map((i) => ({ name: `${i.name}${i.archived ? ' [archivált]' : ''}`, value: i.name })));
+  await interaction.respond(
+    items.map((i) => ({ name: `${i.name}${i.archived ? ' [archivált]' : ''}`, value: i.name }))
+  );
 }

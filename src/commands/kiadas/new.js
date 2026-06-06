@@ -47,14 +47,10 @@ export async function execute(interaction) {
     });
   }
 
-  const [assignment] = await db.$transaction(async (tx) => {
+  // B-07 fix: transaction returns single assignment, no unnecessary array wrapping
+  const assignment = await db.$transaction(async (tx) => {
     const a = await tx.assignment.create({
-      data: {
-        itemId: item.id,
-        guildId: interaction.guildId,
-        userId: targetUser.id,
-        qty,
-      },
+      data: { itemId: item.id, guildId: interaction.guildId, userId: targetUser.id, qty },
     });
     await tx.item.update({
       where: { id: item.id },
@@ -63,14 +59,15 @@ export async function execute(interaction) {
     await tx.movement.create({
       data: { itemId: item.id, type: 'ASSIGN', qty, userId: interaction.user.id, reason },
     });
-    return [a];
+    return a;
   });
 
+  // B-10 fix: show short ID (last 8 chars) — consistent with /kiadas list and /kiadas return
   await interaction.reply({
     embeds: [
       successEmbed(
         'Kiadás rögzítve',
-        `**${item.name}** × **${qty} db** kiadva: <@${targetUser.id}>\nKiadás azonosítója: \`${assignment.id}\``
+        `**${item.name}** × **${qty} db** kiadva: <@${targetUser.id}>\nVisszavételhez ID: \`${assignment.id.slice(-8)}\``
       ),
     ],
   });
@@ -83,7 +80,8 @@ export async function execute(interaction) {
       item: `${item.name} → <@${targetUser.id}>`,
       qty,
       reason,
-    })
+    }),
+    interaction.guildId
   );
 }
 

@@ -1,8 +1,7 @@
 import { SlashCommandSubcommandBuilder } from 'discord.js';
 import db from '../../lib/db.js';
 import { requireArmorer } from '../../lib/permissions.js';
-import { successEmbed, errorEmbed } from '../../lib/embeds.js';
-import { auditEmbed } from '../../lib/embeds.js';
+import { successEmbed, errorEmbed, auditEmbed } from '../../lib/embeds.js';
 import { logToChannel } from '../../lib/logger.js';
 
 export const builder = new SlashCommandSubcommandBuilder()
@@ -38,7 +37,8 @@ export async function execute(interaction) {
 
   await logToChannel(
     interaction.client,
-    auditEmbed({ action: 'Tárgy archiválva', user: interaction.user.id, item: item.name, reason })
+    auditEmbed({ action: 'Tárgy archiválva', user: interaction.user.id, item: item.name, reason },
+    interaction.guildId
   );
 }
 

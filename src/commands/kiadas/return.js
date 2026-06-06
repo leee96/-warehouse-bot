@@ -15,17 +15,18 @@ export const builder = new SlashCommandSubcommandBuilder()
 export async function execute(interaction) {
   if (!(await requireArmorer(interaction))) return;
 
-  const assignmentId = interaction.options.getString('id');
+  const shortId = interaction.options.getString('id').trim();
   const reason = interaction.options.getString('reason');
 
-  const assignment = await db.assignment.findUnique({
-    where: { id: assignmentId },
+  // B-10 fix: accept the 8-char short ID shown in /kiadas list and /kiadas new
+  const assignment = await db.assignment.findFirst({
+    where: { id: { endsWith: shortId }, guildId: interaction.guildId },
     include: { item: true },
   });
 
-  if (!assignment || assignment.guildId !== interaction.guildId) {
+  if (!assignment) {
     return interaction.reply({
-      embeds: [errorEmbed('Nem található', `\`${assignmentId}\` azonosítójú kiadás nem létezik.`)],
+      embeds: [errorEmbed('Nem található', `\`${shortId}\` azonosítójú kiadás nem létezik.`)],
       ephemeral: true,
     });
   }
@@ -39,7 +40,7 @@ export async function execute(interaction) {
 
   await db.$transaction(async (tx) => {
     await tx.assignment.update({
-      where: { id: assignmentId },
+      where: { id: assignment.id },
       data: { returnedAt: new Date(), returnedTo: interaction.user.id },
     });
     await tx.item.update({
@@ -74,6 +75,7 @@ export async function execute(interaction) {
       item: `${assignment.item.name} ← <@${assignment.userId}>`,
       qty: assignment.qty,
       reason,
-    })
+    },
+    interaction.guildId
   );
 }
