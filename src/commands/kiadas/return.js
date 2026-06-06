@@ -1,7 +1,6 @@
 import djs from 'discord.js';
 const { SlashCommandSubcommandBuilder } = djs;
 import db from '../../lib/db.js';
-import { requireArmorer } from '../../lib/permissions.js';
 import { successEmbed, errorEmbed, auditEmbed } from '../../lib/embeds.js';
 import { logToChannel } from '../../lib/logger.js';
 
@@ -13,9 +12,13 @@ export const builder = new SlashCommandSubcommandBuilder()
   )
   .addStringOption((o) => o.setName('reason').setDescription('Indoklás').setRequired(false));
 
-export async function execute(interaction) {
-  if (!(await requireArmorer(interaction))) return;
+async function isArmorer(interaction) {
+  const config = await db.config.findUnique({ where: { guildId: interaction.guildId } });
+  if (!config?.armorRoleId) return false;
+  return interaction.member.roles.cache.has(config.armorRoleId) || interaction.member.permissions.has('Administrator');
+}
 
+export async function execute(interaction) {
   const shortId = interaction.options.getString('id').trim();
   const reason = interaction.options.getString('reason');
 
@@ -35,6 +38,14 @@ export async function execute(interaction) {
   if (!assignment) {
     return interaction.reply({
       embeds: [errorEmbed('Nem található', `\`${shortId}\` azonosítójú kiadás nem létezik.`)],
+      ephemeral: true,
+    });
+  }
+
+  const armorer = await isArmorer(interaction);
+  if (!armorer && assignment.userId !== interaction.user.id) {
+    return interaction.reply({
+      embeds: [errorEmbed('Nincs jogosultságod', 'Csak a saját kiadásodat adhatod vissza.')],
       ephemeral: true,
     });
   }
