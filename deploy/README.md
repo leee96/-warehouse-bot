@@ -1,86 +1,78 @@
-# Deploy útmutató
+# Deploy — SRK Host (Bot Hosting panel)
 
-## Fájlok
+## Mit kell feltölteni
 
-| Fájl | Cél |
-|---|---|
-| `warehouse-bot.service` | systemd service unit |
-| `setup.sh` | Első telepítés (root) |
-| `deploy.sh` | Kód frissítés (warehousebot user) |
-| `backup.sh` | MariaDB napi mentés |
-| `logrotate.conf` | Log rotáció |
-| `sudoers.conf` | Jelszómentes systemctl jogok |
+FTP/SFTP-vel vagy a panel fájlkezelőjével töltsd fel ezeket:
 
----
-
-## Első telepítés
-
-```bash
-# 1. Kód feltöltése a szerverre
-rsync -av --exclude=node_modules --exclude=.env \
-  ./warehouse-bot/ root@YOUR_VPS_IP:/opt/warehouse-bot/
-
-# 2. Setup futtatása root-ként
-ssh root@YOUR_VPS_IP
-bash /opt/warehouse-bot/deploy/setup.sh
-
-# 3. .env kitöltése (a setup kiírja a DB jelszót)
-nano /opt/warehouse-bot/.env
-
-# 4. Bot indítása
-systemctl start warehouse-bot
-journalctl -u warehouse-bot -f
+```
+src/
+prisma/
+package.json
+package-lock.json
+.env.example        ← csak template, majd átnevezed .env-re
 ```
 
+**Ne töltsd fel:**
+- `node_modules/` — a panel telepíti (`npm install`)
+- `tests/` — nem kell production-ban
+- `deploy/` — csak helyi segédfájlok
+- `.git/`, `vitest.config.js`, `eslint.config.js`, `.prettierrc`
+
 ---
 
-## Frissítés (CI/CD vagy manuális)
+## Panel beállítások
 
-```bash
-ssh warehousebot@YOUR_VPS_IP
-cd /opt/warehouse-bot
-bash deploy/deploy.sh
+### Indító parancs
+```
+node src/index.js
 ```
 
----
+### Környezeti változók (Environment Variables)
+A panelen add meg ezeket (vagy töltsd fel a `.env` fájlt):
 
-## Hasznos parancsok
-
-```bash
-# Logok élőben
-journalctl -u warehouse-bot -f
-
-# Utolsó 100 sor
-journalctl -u warehouse-bot -n 100 --no-pager
-
-# Service állapot
-systemctl status warehouse-bot
-
-# Manuális backup
-bash /opt/warehouse-bot/deploy/backup.sh
-
-# Slash parancsok újratelepítése
-sudo -u warehousebot bash -c 'cd /opt/warehouse-bot && node src/deploy-commands.js'
+```
+DISCORD_TOKEN=your_bot_token_here
+CLIENT_ID=your_application_client_id_here
+DATABASE_URL=mysql://USER:PASSWORD@HOST:PORT/DATABASE
+NODE_ENV=production
+LOG_LEVEL=info
 ```
 
----
-
-## Cron / automatizmus
-
-| Mi | Hol | Mikor |
-|---|---|---|
-| DB backup | `/etc/cron.daily/warehouse-bot-backup` | Minden nap (3:00 körül) |
-| Log rotáció | `/etc/logrotate.d/warehouse-bot` | Napi, 14 nap megőrzés |
+> A `DATABASE_URL`-t az SRK Host MySQL/MariaDB adatbázis adataiból állítsd össze.
 
 ---
 
-## Rollback
+## Első indítás előtt
+
+Ha a panel SSH terminált vagy „Run command" funkciót nyújt, futtasd:
 
 ```bash
-cd /opt/warehouse-bot
-git log --oneline -10          # melyik commitig kell visszamenni
-git checkout <commit-hash>
-npm ci --omit=dev
+npm install
 npx prisma generate
-sudo systemctl restart warehouse-bot
+npx prisma migrate deploy
+node src/deploy-commands.js   # slash parancsok regisztrálása Discord-ra
+```
+
+Ha nincs terminál hozzáférés, kérd meg az SRK Host supportot hogy futtassák le, vagy nézd meg, van-e „Install dependencies" gomb a panelen.
+
+---
+
+## Frissítés
+
+1. Töltsd fel az új fájlokat FTP-vel (felülírja a régieket)
+2. Ha adatbázis változás volt: `npx prisma migrate deploy`
+3. Panelen: **Restart bot**
+
+---
+
+## DB mentés
+
+Ha a panel Cron Job funkciót támogat:
+```
+0 3 * * * bash ~/warehouse-bot/deploy/backup.sh
+```
+
+Vagy manuálisan SSH terminálból:
+```bash
+bash deploy/backup.sh
 ```
